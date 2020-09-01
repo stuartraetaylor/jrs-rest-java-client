@@ -21,24 +21,22 @@
 
 package com.jaspersoft.jasperserver.jaxrs.client.core;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.jaspersoft.jasperserver.jaxrs.client.providers.CustomRepresentationTypeProvider;
-import com.sun.jersey.multipart.impl.MultiPartWriter;
-import java.security.SecureRandom;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.logging.Logger;
+import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.jackson.JacksonFeature;
+import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJsonProvider;
+import org.glassfish.jersey.media.multipart.internal.MultiPartWriter;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
-import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.filter.LoggingFilter;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.slf4j.bridge.SLF4JBridgeHandler;
+import java.security.SecureRandom;
+import java.util.Locale;
+import java.util.TimeZone;
 
 
 public class SessionStorage {
@@ -118,25 +116,26 @@ public class SessionStorage {
         }
 
         JacksonJsonProvider customRepresentationTypeProvider = new CustomRepresentationTypeProvider()
-                .configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         rootTarget = client.target(configuration.getJasperReportsServerUrl());
         rootTarget
                 .register(customRepresentationTypeProvider)
                 .register(JacksonFeature.class)
                 .register(MultiPartWriter.class);
         if (configuration.getLogHttp()) {
-            rootTarget.register(initLoggingFilter());
+            // Logging filter not supported (ST).
+            //rootTarget.register(initLoggingFilter());
         }
     }
 
-    private LoggingFilter initLoggingFilter() {
-        Logger logger = Logger.getLogger(this.getClass().getName());
-        SLF4JBridgeHandler.removeHandlersForRootLogger();
-        SLF4JBridgeHandler.install();
-
-        return new LoggingFilter(logger,
-                configuration.getLogHttpEntity());
-    }
+//    private LoggingFilter initLoggingFilter() {
+//        Logger logger = Logger.getLogger(this.getClass().getName());
+//        SLF4JBridgeHandler.removeHandlersForRootLogger();
+//        SLF4JBridgeHandler.install();
+//
+//        return new LoggingFilter(logger,
+//                configuration.getLogHttpEntity());
+//    }
 
 
     public RestClientConfiguration getConfiguration() {
